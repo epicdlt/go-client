@@ -39,3 +39,8 @@ type ObjectResponse struct {
 	Message string      `json:"message"`
 	Object  interface{} `json:"object"`
 }
+
+type CodeStateResponse struct {
+	Message string      `json:"message"`
+	State   interface{} `json:"state"`
+}
