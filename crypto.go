@@ -9,6 +9,28 @@ import (
 	"gopkg.in/square/go-jose.v2"
 )
 
+func GenerateKey() (ed25519.PublicKey, ed25519.PrivateKey, error) {
+	pubKey, pk, err := ed25519.GenerateKey(nil)
+	return pubKey, pk, err
+}
+
+// GenerateKeyEncoded returns public key, private key, error
+func GenerateKeyEncoded() (string, string, error) {
+	pubKey, pk, err := ed25519.GenerateKey(nil)
+	if err != nil {
+		return "", "", err
+	}
+	return EncodeKey(pubKey), EncodeKey(pk), nil
+}
+
+func EncodeKey(k []byte) string {
+	s, err := multibase.Encode(multibase.Base32, k)
+	if err != nil {
+		panic(err)
+	}
+	return s
+}
+
 func PrivateKeyFromHashed(ctx context.Context, privateKey string) (ed25519.PrivateKey, error) {
 	_, pkBytes, err := multibase.Decode(privateKey)
 	if err != nil {
