@@ -14,6 +14,9 @@ type Transaction struct {
 	From   string          `json:"from"`
 	To     string          `json:"to"`
 	Amount decimal.Decimal `json:"amount"`
+	// Fee in EPIC. A transaction must include a fee. It can be in a wrapped transaction.
+	Fee decimal.Decimal `json:"fee"`
+
 	// Arguments for contracts
 	Args []string `json:"args"`
 
@@ -39,6 +42,10 @@ type Transaction struct {
 	CreatedAt time.Time `json:"createdAt"`
 	// PreviousID is the previous transaction ID in the chain
 	PreviousID string `json:"previousID"`
+
+	// Wrapped is the next transaction in the chain, for instance a tx may be wrapped with a fee tx or an extra signature
+	Wrapped    *Transaction `json:"wrapped"`
+	WrappedJWS string       `json:"jws"`
 }
 
 type TransactionInput struct {

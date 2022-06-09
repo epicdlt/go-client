@@ -52,7 +52,7 @@ func init() {
 
 // SubmitTx ...
 // codeRef is a docker image or wasm reference
-func SubmitTx(ctx context.Context, rpcURL, privateKey string, amount decimal.Decimal, to string, codeRef string, args []string) (*models.Transaction, error) {
+func SubmitTx(ctx context.Context, rpcURL, privateKey string, amount decimal.Decimal, to string, fee decimal.Decimal, codeRef string, args []string) (*models.Transaction, error) {
 	ctx, err := tag.New(ctx, tag.Insert(KeyMethod, "SubmitTx"), tag.Insert(KeyStatus, "OK"))
 	if err != nil {
 		return nil, err
@@ -95,6 +95,7 @@ func SubmitTx(ctx context.Context, rpcURL, privateKey string, amount decimal.Dec
 		From:   pubHashed,
 		To:     to,
 		Amount: amount,
+		Fee:    fee,
 		Nonce:  state.State.Nonce + 1,
 		Code:   codeRef,
 		Args:   args, // for contracts

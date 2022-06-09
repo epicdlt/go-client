@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/epicdlt/go-client/models"
 	"github.com/multiformats/go-multibase"
 	"golang.org/x/crypto/ed25519"
 	"gopkg.in/square/go-jose.v2"
@@ -84,6 +85,44 @@ func SignWithPK(ctx context.Context, pk ed25519.PrivateKey, toSign interface{}) 
 	// object.CompactSerialize() instead.
 	serialized := object.FullSerialize()
 	return serialized, nil
+}
+
+func VerifyTx(ctx context.Context, jws string) (*models.Transaction, error) {
+	object, err := jose.ParseSigned(jws)
+	if err != nil {
+		return nil, err
+	}
+	// fmt.Printf("jws parsed: %+v\n", object)
+
+	unsafePayload := object.UnsafePayloadWithoutVerification()
+	tx := &models.Transaction{}
+	err = json.Unmarshal(unsafePayload, tx)
+	if err != nil {
+		return nil, err
+	}
+
+	// from is the publicKey
+	from := tx.From
+
+	// Now we can verify the signature on the payload. An error here would
+	// indicate the the message failed to verify, e.g. because the signature was
+	// broken or the message was tampered with.
+	_, pubKeyBytes, err := multibase.Decode(from)
+	if err != nil {
+		return nil, err
+	}
+	pubKey := ed25519.PublicKey(pubKeyBytes)
+	// todo: can use VerifyMulti here if we have multiple signatures
+	payload, err := object.Verify(pubKey)
+	if err != nil {
+		return nil, err
+	}
+	tx = &models.Transaction{}
+	err = json.Unmarshal(payload, tx)
+	if err != nil {
+		return nil, err
+	}
+	return tx, nil
 }
 
 func Verify(ctx context.Context, publicKey string, jws string) ([]byte, error) {
